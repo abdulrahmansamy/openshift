@@ -1,0 +1,2 @@
+# openshift
+OpenShift training resources
