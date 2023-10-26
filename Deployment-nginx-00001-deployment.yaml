@@ -1,0 +1,245 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    autoscaling.knative.dev/target: "100"
+    autoscaling.knative.dev/targetUtilizationPercentage: "70"
+    autoscaling.knative.dev/window: 60s
+    deployment.kubernetes.io/revision: "1"
+    serving.knative.dev/creator: asamy
+  creationTimestamp: "2023-10-26T12:10:04Z"
+  generation: 3
+  labels:
+    app: nginx-00001
+    app.kubernetes.io/component: nginx
+    app.kubernetes.io/instance: nginx
+    app.kubernetes.io/part-of: nginx-app
+    app.openshift.io/runtime: nginx
+    app.openshift.io/runtime-namespace: asamy-dev
+    app.openshift.io/runtime-version: latest
+    serving.knative.dev/configuration: nginx
+    serving.knative.dev/configurationGeneration: "1"
+    serving.knative.dev/configurationUID: c7cefc5f-8c8c-4662-acec-b1b955aed1e8
+    serving.knative.dev/revision: nginx-00001
+    serving.knative.dev/revisionUID: 15e5019d-0a89-49c4-9223-9b3ef1fc068a
+    serving.knative.dev/service: nginx
+    serving.knative.dev/serviceUID: 3ead78b0-481d-4365-a06a-a44bfbf2976b
+  name: nginx-00001-deployment
+  namespace: asamy-dev
+  ownerReferences:
+  - apiVersion: serving.knative.dev/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Revision
+    name: nginx-00001
+    uid: 15e5019d-0a89-49c4-9223-9b3ef1fc068a
+  resourceVersion: "1443005878"
+  uid: 7c4f2f4b-117d-420d-a0ba-39f96cac9f99
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 6
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      serving.knative.dev/revisionUID: 15e5019d-0a89-49c4-9223-9b3ef1fc068a
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/target: "100"
+        autoscaling.knative.dev/targetUtilizationPercentage: "70"
+        autoscaling.knative.dev/window: 60s
+        serving.knative.dev/creator: asamy
+      creationTimestamp: null
+      labels:
+        app: nginx-00001
+        app.kubernetes.io/component: nginx
+        app.kubernetes.io/instance: nginx
+        app.kubernetes.io/part-of: nginx-app
+        app.openshift.io/runtime: nginx
+        app.openshift.io/runtime-namespace: asamy-dev
+        app.openshift.io/runtime-version: latest
+        serving.knative.dev/configuration: nginx
+        serving.knative.dev/configurationGeneration: "1"
+        serving.knative.dev/configurationUID: c7cefc5f-8c8c-4662-acec-b1b955aed1e8
+        serving.knative.dev/revision: nginx-00001
+        serving.knative.dev/revisionUID: 15e5019d-0a89-49c4-9223-9b3ef1fc068a
+        serving.knative.dev/service: nginx
+        serving.knative.dev/serviceUID: 3ead78b0-481d-4365-a06a-a44bfbf2976b
+    spec:
+      containers:
+      - env:
+        - name: PORT
+          value: "8080"
+        - name: K_REVISION
+          value: nginx-00001
+        - name: K_CONFIGURATION
+          value: nginx
+        - name: K_SERVICE
+          value: nginx
+        image: image-registry.openshift-image-registry.svc:5000/asamy-dev/nginx@sha256:0d60ba9498d4491525334696a736b4c19b56231b972061fab2f536d48ebfd7ce
+        imagePullPolicy: Always
+        lifecycle:
+          preStop:
+            httpGet:
+              path: /wait-for-drain
+              port: 8022
+              scheme: HTTP
+        name: nginx
+        ports:
+        - containerPort: 8080
+          name: user-port
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: FallbackToLogsOnError
+      - env:
+        - name: SERVING_NAMESPACE
+          value: asamy-dev
+        - name: SERVING_SERVICE
+          value: nginx
+        - name: SERVING_CONFIGURATION
+          value: nginx
+        - name: SERVING_REVISION
+          value: nginx-00001
+        - name: QUEUE_SERVING_PORT
+          value: "8012"
+        - name: QUEUE_SERVING_TLS_PORT
+          value: "8112"
+        - name: CONTAINER_CONCURRENCY
+          value: "0"
+        - name: REVISION_TIMEOUT_SECONDS
+          value: "300"
+        - name: REVISION_RESPONSE_START_TIMEOUT_SECONDS
+          value: "0"
+        - name: REVISION_IDLE_TIMEOUT_SECONDS
+          value: "0"
+        - name: SERVING_POD
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: SERVING_POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        - name: SERVING_LOGGING_CONFIG
+        - name: SERVING_LOGGING_LEVEL
+        - name: SERVING_REQUEST_LOG_TEMPLATE
+          value: '{"httpRequest": {"requestMethod": "{{.Request.Method}}", "requestUrl":
+            "{{js .Request.RequestURI}}", "requestSize": "{{.Request.ContentLength}}",
+            "status": {{.Response.Code}}, "responseSize": "{{.Response.Size}}", "userAgent":
+            "{{js .Request.UserAgent}}", "remoteIp": "{{js .Request.RemoteAddr}}",
+            "serverIp": "{{.Revision.PodIP}}", "referer": "{{js .Request.Referer}}",
+            "latency": "{{.Response.Latency}}s", "protocol": "{{.Request.Proto}}"},
+            "traceId": "{{index .Request.Header "X-B3-Traceid"}}"}'
+        - name: SERVING_ENABLE_REQUEST_LOG
+          value: "false"
+        - name: SERVING_REQUEST_METRICS_BACKEND
+          value: prometheus
+        - name: TRACING_CONFIG_BACKEND
+          value: none
+        - name: TRACING_CONFIG_ZIPKIN_ENDPOINT
+        - name: TRACING_CONFIG_DEBUG
+          value: "false"
+        - name: TRACING_CONFIG_SAMPLE_RATE
+          value: "0.1"
+        - name: USER_PORT
+          value: "8080"
+        - name: SYSTEM_NAMESPACE
+          value: knative-serving
+        - name: METRICS_DOMAIN
+          value: knative.dev/internal/serving
+        - name: SERVING_READINESS_PROBE
+          value: '{"tcpSocket":{"port":8080,"host":"127.0.0.1"},"successThreshold":1}'
+        - name: ENABLE_PROFILING
+          value: "true"
+        - name: SERVING_ENABLE_PROBE_REQUEST_LOG
+          value: "false"
+        - name: METRICS_COLLECTOR_ADDRESS
+        - name: CONCURRENCY_STATE_ENDPOINT
+        - name: CONCURRENCY_STATE_TOKEN_PATH
+          value: /var/run/secrets/tokens/state-token
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.hostIP
+        - name: ENABLE_HTTP2_AUTO_DETECTION
+          value: "false"
+        - name: ROOT_CA
+        image: registry.redhat.io/openshift-serverless-1/serving-queue-rhel8@sha256:96f096660fdfbe8a319dc2653b503bdb2c7f226837ace099658c895f8f36a207
+        imagePullPolicy: IfNotPresent
+        name: queue-proxy
+        ports:
+        - containerPort: 8022
+          name: http-queueadm
+          protocol: TCP
+        - containerPort: 9090
+          name: http-autometric
+          protocol: TCP
+        - containerPort: 9091
+          name: http-usermetric
+          protocol: TCP
+        - containerPort: 8008
+          name: profiling-port
+          protocol: TCP
+        - containerPort: 8012
+          name: queue-port
+          protocol: TCP
+        - containerPort: 8112
+          name: https-port
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            httpHeaders:
+            - name: K-Network-Probe
+              value: queue
+            path: /
+            port: 8012
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          requests:
+            cpu: 25m
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: false
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 300
+status:
+  conditions:
+  - lastTransitionTime: "2023-10-26T12:20:34Z"
+    lastUpdateTime: "2023-10-26T12:20:34Z"
+    message: ReplicaSet "nginx-00001-deployment-7bccd587bf" has successfully progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  - lastTransitionTime: "2023-10-26T12:24:01Z"
+    lastUpdateTime: "2023-10-26T12:24:01Z"
+    message: Deployment does not have minimum availability.
+    reason: MinimumReplicasUnavailable
+    status: "False"
+    type: Available
+  observedGeneration: 3
+  replicas: 2
+  unavailableReplicas: 2
+  updatedReplicas: 2
